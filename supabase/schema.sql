@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.berita (
   slug text NOT NULL,
   ringkasan text,
   isi text,
-  url_gambar_sampul text,
+  gambar_sampul text,
   nama_penulis text,
   status text NOT NULL DEFAULT 'draf',
   unggulan boolean NOT NULL DEFAULT false,
