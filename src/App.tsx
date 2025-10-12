@@ -11,6 +11,10 @@ import Kontak from "./pages/Kontak";
 import Layanan from "./pages/Layanan";
 import Produk from "./pages/Produk";
 import Transparansi from "./pages/Transparansi";
+import Statistik from "./pages/Statistik";
+import PetaDesa from "./pages/PetaDesa";
+import Pengumuman from "./pages/Pengumuman";
+import Agenda from "./pages/Agenda";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +33,10 @@ const App = () => (
           <Route path="/layanan" element={<Layanan />} />
           <Route path="/produk" element={<Produk />} />
           <Route path="/transparansi" element={<Transparansi />} />
+          <Route path="/statistik" element={<Statistik />} />
+          <Route path="/peta-desa" element={<PetaDesa />} />
+          <Route path="/pengumuman" element={<Pengumuman />} />
+          <Route path="/agenda" element={<Agenda />} />
           <Route path="/kontak" element={<Kontak />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -15,6 +15,10 @@ const Navbar = () => {
     { name: "Layanan", path: "/layanan" },
     { name: "Produk UMKM", path: "/produk" },
     { name: "Transparansi", path: "/transparansi" },
+    { name: "Statistik", path: "/statistik" },
+    { name: "Peta Desa", path: "/peta-desa" },
+    { name: "Pengumuman", path: "/pengumuman" },
+    { name: "Agenda", path: "/agenda" },
     { name: "Kontak", path: "/kontak" },
   ];
 
