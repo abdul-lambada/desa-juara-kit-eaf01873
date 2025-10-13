@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-class KategoriBerita extends Model
+class KategoriUmkm extends Model
 {
     protected function table(): string
     {
-        return 'kategori_berita';
+        return 'kategori_umkm';
     }
 
     public function paginate(int $desaId, int $page = 1, int $perPage = 10, array $filters = []): array
@@ -56,27 +56,27 @@ class KategoriBerita extends Model
         ];
     }
 
-    public function options(int $desaId): array
-    {
-        $items = $this->db->fetchAll(
-            "SELECT id, nama FROM {$this->table()} WHERE desa_id = :desa ORDER BY nama ASC",
-            ['desa' => $desaId]
-        );
-
-        $options = [];
-        foreach ($items as $item) {
-            $options[$item['id']] = $item['nama'];
-        }
-
-        return $options;
-    }
-
     public function findForDesa(int|string $id, int $desaId): ?array
     {
         return $this->db->fetch(
             "SELECT * FROM {$this->table()} WHERE id = :id AND desa_id = :desa LIMIT 1",
             ['id' => $id, 'desa' => $desaId]
         );
+    }
+
+    public function options(int $desaId): array
+    {
+        $rows = $this->db->fetchAll(
+            "SELECT id, nama FROM {$this->table()} WHERE desa_id = :desa ORDER BY nama ASC",
+            ['desa' => $desaId]
+        );
+
+        $options = [];
+        foreach ($rows as $row) {
+            $options[$row['id']] = $row['nama'];
+        }
+
+        return $options;
     }
 
     public function create(array $data): int

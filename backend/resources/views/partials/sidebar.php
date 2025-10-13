@@ -35,6 +35,18 @@ $menu = [
             'url' => '/layanan',
             'active' => str_starts_with($requestUri, '/layanan'),
         ],
+        [
+            'icon' => 'fas fa-fw fa-chart-pie',
+            'label' => 'Statistik',
+            'url' => '/statistik',
+            'active' => str_starts_with($requestUri, '/statistik'),
+        ],
+        [
+            'icon' => 'fas fa-fw fa-tags',
+            'label' => 'Kategori UMKM',
+            'url' => '/kategori-umkm',
+            'active' => str_starts_with($requestUri, '/kategori-umkm'),
+        ],
     ],
 ];
 ?>
@@ -71,6 +83,19 @@ $menu = [
             </a>
         </li>
     <?php endforeach; ?>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">
+        Media & Galeri
+    </div>
+
+    <li class="nav-item <?= str_starts_with($requestUri, '/galeri/albums') ? 'active' : '' ?>">
+        <a class="nav-link" href="<?= htmlspecialchars('/galeri/albums') ?>">
+            <i class="fas fa-fw fa-images"></i>
+            <span>Album Galeri</span>
+        </a>
+    </li>
 
     <hr class="sidebar-divider d-none d-md-block">
 

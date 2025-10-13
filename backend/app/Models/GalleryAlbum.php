@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-class KategoriBerita extends Model
+class GalleryAlbum extends Model
 {
     protected function table(): string
     {
-        return 'kategori_berita';
+        return 'gallery_albums';
     }
 
     public function paginate(int $desaId, int $page = 1, int $perPage = 10, array $filters = []): array
@@ -19,13 +19,18 @@ class KategoriBerita extends Model
         $params = ['desa' => $desaId];
 
         if (!empty($filters['q'])) {
-            $conditions[] = 'nama LIKE :search';
+            $conditions[] = 'title LIKE :search';
             $params['search'] = '%' . $filters['q'] . '%';
+        }
+
+        if (isset($filters['unggulan']) && $filters['unggulan'] !== '') {
+            $conditions[] = 'is_featured = :unggulan';
+            $params['unggulan'] = (int) (bool) $filters['unggulan'];
         }
 
         $where = 'WHERE ' . implode(' AND ', $conditions);
 
-        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY nama ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY (published_at IS NULL), published_at DESC, created_at DESC LIMIT :limit OFFSET :offset";
         $stmt = $this->pdo()->prepare($sql);
 
         foreach ($params as $key => $value) {
@@ -56,19 +61,19 @@ class KategoriBerita extends Model
         ];
     }
 
-    public function options(int $desaId): array
+    public function create(array $data): int
     {
-        $items = $this->db->fetchAll(
-            "SELECT id, nama FROM {$this->table()} WHERE desa_id = :desa ORDER BY nama ASC",
-            ['desa' => $desaId]
-        );
+        $data['slug'] = $this->uniqueSlug($data['title']);
+        return $this->insert($data);
+    }
 
-        $options = [];
-        foreach ($items as $item) {
-            $options[$item['id']] = $item['nama'];
+    public function updateWithSlug(int|string $id, array $data): int
+    {
+        if (isset($data['title'])) {
+            $data['slug'] = $this->uniqueSlug($data['title'], 'slug', $id);
         }
 
-        return $options;
+        return $this->update($id, $data);
     }
 
     public function findForDesa(int|string $id, int $desaId): ?array
@@ -77,21 +82,5 @@ class KategoriBerita extends Model
             "SELECT * FROM {$this->table()} WHERE id = :id AND desa_id = :desa LIMIT 1",
             ['id' => $id, 'desa' => $desaId]
         );
-    }
-
-    public function create(array $data): int
-    {
-        $data['slug'] = $this->uniqueSlug($data['nama']);
-
-        return $this->insert($data);
-    }
-
-    public function updateWithSlug(int|string $id, array $data): int
-    {
-        if (isset($data['nama'])) {
-            $data['slug'] = $this->uniqueSlug($data['nama'], 'slug', $id);
-        }
-
-        return $this->update($id, $data);
     }
 }

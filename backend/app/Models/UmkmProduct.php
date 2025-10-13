@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-class KategoriBerita extends Model
+class UmkmProduct extends Model
 {
     protected function table(): string
     {
-        return 'kategori_berita';
+        return 'umkm_products';
     }
 
     public function paginate(int $desaId, int $page = 1, int $perPage = 10, array $filters = []): array
@@ -19,13 +19,28 @@ class KategoriBerita extends Model
         $params = ['desa' => $desaId];
 
         if (!empty($filters['q'])) {
-            $conditions[] = 'nama LIKE :search';
+            $conditions[] = '(name LIKE :search OR description LIKE :search OR seller_name LIKE :search)';
             $params['search'] = '%' . $filters['q'] . '%';
+        }
+
+        if (!empty($filters['kategori_id'])) {
+            $conditions[] = 'category_id = :kategori';
+            $params['kategori'] = $filters['kategori_id'];
+        }
+
+        if (isset($filters['aktif']) && $filters['aktif'] !== '') {
+            $conditions[] = 'is_active = :aktif';
+            $params['aktif'] = (int) (bool) $filters['aktif'];
+        }
+
+        if (isset($filters['unggulan']) && $filters['unggulan'] !== '') {
+            $conditions[] = 'featured = :unggulan';
+            $params['unggulan'] = (int) (bool) $filters['unggulan'];
         }
 
         $where = 'WHERE ' . implode(' AND ', $conditions);
 
-        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY nama ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY featured DESC, created_at DESC LIMIT :limit OFFSET :offset";
         $stmt = $this->pdo()->prepare($sql);
 
         foreach ($params as $key => $value) {
@@ -39,12 +54,11 @@ class KategoriBerita extends Model
         $data = $stmt->fetchAll();
 
         $countStmt = $this->pdo()->prepare("SELECT COUNT(*) AS aggregate FROM {$this->table()} {$where}");
-
         foreach ($params as $key => $value) {
             $countStmt->bindValue(':' . $key, $value);
         }
-
         $countStmt->execute();
+
         $total = (int) $countStmt->fetchColumn();
 
         return [
@@ -56,19 +70,19 @@ class KategoriBerita extends Model
         ];
     }
 
-    public function options(int $desaId): array
+    public function create(array $data): int
     {
-        $items = $this->db->fetchAll(
-            "SELECT id, nama FROM {$this->table()} WHERE desa_id = :desa ORDER BY nama ASC",
-            ['desa' => $desaId]
-        );
+        $data['slug'] = $this->uniqueSlug($data['name']);
+        return $this->insert($data);
+    }
 
-        $options = [];
-        foreach ($items as $item) {
-            $options[$item['id']] = $item['nama'];
+    public function updateWithSlug(int|string $id, array $data): int
+    {
+        if (isset($data['name'])) {
+            $data['slug'] = $this->uniqueSlug($data['name'], 'slug', $id);
         }
 
-        return $options;
+        return $this->update($id, $data);
     }
 
     public function findForDesa(int|string $id, int $desaId): ?array
@@ -77,21 +91,5 @@ class KategoriBerita extends Model
             "SELECT * FROM {$this->table()} WHERE id = :id AND desa_id = :desa LIMIT 1",
             ['id' => $id, 'desa' => $desaId]
         );
-    }
-
-    public function create(array $data): int
-    {
-        $data['slug'] = $this->uniqueSlug($data['nama']);
-
-        return $this->insert($data);
-    }
-
-    public function updateWithSlug(int|string $id, array $data): int
-    {
-        if (isset($data['nama'])) {
-            $data['slug'] = $this->uniqueSlug($data['nama'], 'slug', $id);
-        }
-
-        return $this->update($id, $data);
     }
 }

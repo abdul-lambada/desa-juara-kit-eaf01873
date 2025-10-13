@@ -2,30 +2,30 @@
 
 namespace App\Models;
 
-class KategoriBerita extends Model
+class GalleryPhoto extends Model
 {
     protected function table(): string
     {
-        return 'kategori_berita';
+        return 'gallery_photos';
     }
 
-    public function paginate(int $desaId, int $page = 1, int $perPage = 10, array $filters = []): array
+    public function paginate(int $albumId, int $page = 1, int $perPage = 12, array $filters = []): array
     {
         $perPage = max(1, $perPage);
         $page = max(1, $page);
         $offset = ($page - 1) * $perPage;
 
-        $conditions = ['desa_id = :desa'];
-        $params = ['desa' => $desaId];
+        $conditions = ['album_id = :album'];
+        $params = ['album' => $albumId];
 
         if (!empty($filters['q'])) {
-            $conditions[] = 'nama LIKE :search';
+            $conditions[] = '(title LIKE :search OR description LIKE :search)';
             $params['search'] = '%' . $filters['q'] . '%';
         }
 
         $where = 'WHERE ' . implode(' AND ', $conditions);
 
-        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY nama ASC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM {$this->table()} {$where} ORDER BY display_order ASC, created_at DESC LIMIT :limit OFFSET :offset";
         $stmt = $this->pdo()->prepare($sql);
 
         foreach ($params as $key => $value) {
@@ -39,12 +39,11 @@ class KategoriBerita extends Model
         $data = $stmt->fetchAll();
 
         $countStmt = $this->pdo()->prepare("SELECT COUNT(*) AS aggregate FROM {$this->table()} {$where}");
-
         foreach ($params as $key => $value) {
             $countStmt->bindValue(':' . $key, $value);
         }
-
         $countStmt->execute();
+
         $total = (int) $countStmt->fetchColumn();
 
         return [
@@ -56,42 +55,21 @@ class KategoriBerita extends Model
         ];
     }
 
-    public function options(int $desaId): array
-    {
-        $items = $this->db->fetchAll(
-            "SELECT id, nama FROM {$this->table()} WHERE desa_id = :desa ORDER BY nama ASC",
-            ['desa' => $desaId]
-        );
-
-        $options = [];
-        foreach ($items as $item) {
-            $options[$item['id']] = $item['nama'];
-        }
-
-        return $options;
-    }
-
-    public function findForDesa(int|string $id, int $desaId): ?array
+    public function findForAlbum(int|string $id, int $albumId): ?array
     {
         return $this->db->fetch(
-            "SELECT * FROM {$this->table()} WHERE id = :id AND desa_id = :desa LIMIT 1",
-            ['id' => $id, 'desa' => $desaId]
+            "SELECT * FROM {$this->table()} WHERE id = :id AND album_id = :album LIMIT 1",
+            ['id' => $id, 'album' => $albumId]
         );
     }
 
     public function create(array $data): int
     {
-        $data['slug'] = $this->uniqueSlug($data['nama']);
-
         return $this->insert($data);
     }
 
-    public function updateWithSlug(int|string $id, array $data): int
+    public function updatePhoto(int|string $id, array $data): int
     {
-        if (isset($data['nama'])) {
-            $data['slug'] = $this->uniqueSlug($data['nama'], 'slug', $id);
-        }
-
         return $this->update($id, $data);
     }
 }
