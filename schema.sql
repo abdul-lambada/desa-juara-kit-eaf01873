@@ -338,7 +338,7 @@ CREATE TABLE IF NOT EXISTS `dokumen_unduhan` (
   CONSTRAINT `dokumen_unduhan_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pengguna` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `auth_user_id` CHAR(36) DEFAULT NULL,
   `desa_id` BIGINT UNSIGNED DEFAULT NULL,
@@ -351,11 +351,11 @@ CREATE TABLE IF NOT EXISTS `pengguna` (
   `dibuat_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `diperbarui_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pengguna_email_unik` (`email`),
-  CONSTRAINT `pengguna_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE SET NULL
+  UNIQUE KEY `users_email_unik` (`email`),
+  CONSTRAINT `users_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `peran` (
+CREATE TABLE IF NOT EXISTS `roles` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `desa_id` BIGINT UNSIGNED DEFAULT NULL,
   `nama` VARCHAR(255) NOT NULL,
@@ -366,39 +366,39 @@ CREATE TABLE IF NOT EXISTS `peran` (
   `dibuat_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `diperbarui_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `peran_slug_unik` (`slug`),
-  CONSTRAINT `peran_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE CASCADE
+  UNIQUE KEY `roles_slug_unik` (`slug`),
+  CONSTRAINT `roles_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pengguna_peran` (
+CREATE TABLE IF NOT EXISTS `user_roles` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `pengguna_id` BIGINT UNSIGNED NOT NULL,
-  `peran_id` BIGINT UNSIGNED NOT NULL,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `role_id` BIGINT UNSIGNED NOT NULL,
   `desa_id` BIGINT UNSIGNED DEFAULT NULL,
   `status` ENUM('aktif','dicabut') NOT NULL DEFAULT 'aktif',
-  `ditetapkan_oleh` BIGINT UNSIGNED DEFAULT NULL,
-  `ditetapkan_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `assigned_by` BIGINT UNSIGNED DEFAULT NULL,
+  `assigned_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `dibuat_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `diperbarui_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pengguna_peran_unik` (`pengguna_id`,`peran_id`,`desa_id`),
-  CONSTRAINT `pengguna_peran_pengguna_fk` FOREIGN KEY (`pengguna_id`) REFERENCES `pengguna`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `pengguna_peran_peran_fk` FOREIGN KEY (`peran_id`) REFERENCES `peran`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `pengguna_peran_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `pengguna_peran_penetu_fk` FOREIGN KEY (`ditetapkan_oleh`) REFERENCES `pengguna`(`id`) ON DELETE SET NULL
+  UNIQUE KEY `user_roles_unik` (`user_id`,`role_id`,`desa_id`),
+  CONSTRAINT `user_roles_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_roles_role_fk` FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_roles_desa_fk` FOREIGN KEY (`desa_id`) REFERENCES `desa`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_roles_assigner_fk` FOREIGN KEY (`assigned_by`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `peran_hak_akses` (
+CREATE TABLE IF NOT EXISTS `role_permissions` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `peran_id` BIGINT UNSIGNED NOT NULL,
-  `modul` ENUM('profil_desa','berita','pengumuman','agenda','layanan','umkm','galeri','transparansi','statistik','dokumen','pesan','pengguna') NOT NULL,
-  `boleh_lihat` TINYINT(1) NOT NULL DEFAULT 0,
-  `boleh_kelola` TINYINT(1) NOT NULL DEFAULT 0,
+  `role_id` BIGINT UNSIGNED NOT NULL,
+  `module` ENUM('profil_desa','berita','pengumuman','agenda','layanan','umkm','galeri','transparansi','statistik','dokumen','pesan','pengguna') NOT NULL,
+  `can_view` TINYINT(1) NOT NULL DEFAULT 0,
+  `can_manage` TINYINT(1) NOT NULL DEFAULT 0,
   `dibuat_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `diperbarui_pada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `peran_hak_akses_unik` (`peran_id`,`modul`),
-  CONSTRAINT `peran_hak_akses_peran_fk` FOREIGN KEY (`peran_id`) REFERENCES `peran`(`id`) ON DELETE CASCADE
+  UNIQUE KEY `role_permissions_unik` (`role_id`,`module`),
+  CONSTRAINT `role_permissions_role_fk` FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO `desa` (`id`, `nama`, `slogan`, `deskripsi`, `alamat`, `telepon`, `email`, `situs_web`, `latitude`, `longitude`, `dibuat_pada`, `diperbarui_pada`) VALUES
@@ -486,16 +486,16 @@ INSERT IGNORE INTO `pesan_kontak` (`id`, `desa_id`, `nama_lengkap`, `email`, `te
 INSERT IGNORE INTO `dokumen_unduhan` (`id`, `desa_id`, `judul`, `berkas`, `tipe_berkas`, `deskripsi`, `dipublikasikan_pada`, `dibuat_pada`, `diperbarui_pada`) VALUES
 (1, 1, 'Perdes RPJM Desa 2024-2030', 'perdes-rpjm-2024-2030.pdf', 'pdf', 'Peraturan desa tentang RPJM Desa Juara.', '2025-02-05 10:00:00', '2025-02-05 10:00:00', '2025-02-05 10:00:00');
 
-INSERT IGNORE INTO `pengguna` (`id`, `auth_user_id`, `desa_id`, `nama`, `email`, `telepon`, `foto_profil`, `status`, `terakhir_masuk`, `dibuat_pada`, `diperbarui_pada`) VALUES
+INSERT IGNORE INTO `users` (`id`, `auth_user_id`, `desa_id`, `nama`, `email`, `telepon`, `foto_profil`, `status`, `terakhir_masuk`, `dibuat_pada`, `diperbarui_pada`) VALUES
 (1, NULL, 1, 'Admin Desa Juara', 'admin@desajuara.id', '081234567890', NULL, 'aktif', '2025-03-01 07:45:00', '2025-01-02 08:00:00', '2025-03-01 07:45:00');
 
-INSERT IGNORE INTO `peran` (`id`, `desa_id`, `nama`, `slug`, `deskripsi`, `prioritas`, `bawaan`, `dibuat_pada`, `diperbarui_pada`) VALUES
+INSERT IGNORE INTO `roles` (`id`, `desa_id`, `nama`, `slug`, `deskripsi`, `prioritas`, `bawaan`, `dibuat_pada`, `diperbarui_pada`) VALUES
 (1, 1, 'Administrator', 'administrator', 'Memiliki akses penuh terhadap seluruh modul.', 1, 1, '2025-01-02 08:30:00', '2025-01-02 08:30:00');
 
-INSERT IGNORE INTO `pengguna_peran` (`id`, `pengguna_id`, `peran_id`, `desa_id`, `status`, `ditetapkan_oleh`, `ditetapkan_pada`, `dibuat_pada`, `diperbarui_pada`) VALUES
+INSERT IGNORE INTO `user_roles` (`id`, `user_id`, `role_id`, `desa_id`, `status`, `assigned_by`, `assigned_at`, `dibuat_pada`, `diperbarui_pada`) VALUES
 (1, 1, 1, 1, 'aktif', 1, '2025-01-02 09:00:00', '2025-01-02 09:00:00', '2025-01-02 09:00:00');
 
-INSERT IGNORE INTO `peran_hak_akses` (`id`, `peran_id`, `modul`, `boleh_lihat`, `boleh_kelola`, `dibuat_pada`, `diperbarui_pada`) VALUES
+INSERT IGNORE INTO `role_permissions` (`id`, `role_id`, `module`, `can_view`, `can_manage`, `dibuat_pada`, `diperbarui_pada`) VALUES
 (1, 1, 'profil_desa', 1, 1, '2025-01-02 09:05:00', '2025-01-02 09:05:00'),
 (2, 1, 'berita', 1, 1, '2025-01-02 09:05:00', '2025-01-02 09:05:00'),
 (3, 1, 'pengumuman', 1, 1, '2025-01-02 09:05:00', '2025-01-02 09:05:00'),
