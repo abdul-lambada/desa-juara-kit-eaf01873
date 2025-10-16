@@ -6,9 +6,9 @@ Backend ini merupakan implementasi MVC ringan berbasis PHP untuk mengelola data 
 
 - PHP 8.1+
 - Composer
-- Ekstensi PDO (MySQL/PostgreSQL sesuai kebutuhan)
+- Ekstensi PDO (MySQL)
 - Web server (Apache/Nginx) atau PHP built-in server
-- Database yang telah memiliki skema `supabase/schema.sql`
+- Database yang telah memiliki skema `schema.sql`
 
 ## Instalasi
 

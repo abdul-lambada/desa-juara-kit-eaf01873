@@ -3,7 +3,7 @@
         'name' => 'desa-juara/backend',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'f3b9464daf1cdd532d0b9eaf9b3f5c500a9b6028',
+        'reference' => '8205c2dc0f0e784d86d0dcdca45935a19a8c6fcf',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'desa-juara/backend' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'f3b9464daf1cdd532d0b9eaf9b3f5c500a9b6028',
+            'reference' => '8205c2dc0f0e784d86d0dcdca45935a19a8c6fcf',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -8,9 +8,10 @@ return [
             '/auth/process',
         ],
     ],
-    'supabase' => [
-        'url' => rtrim(env('SUPABASE_URL', ''), '/'),
-        'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY', ''),
-        'anon_key' => env('SUPABASE_ANON_KEY', ''),
+    'credentials' => [
+        'email' => env('ADMIN_EMAIL', 'admin@desajuara.id'),
+        'password' => env('ADMIN_PASSWORD', 'password'),
+        'password_hash' => env('ADMIN_PASSWORD_HASH', ''),
+        'name' => env('ADMIN_NAME', 'Admin Desa Juara'),
     ],
 ];

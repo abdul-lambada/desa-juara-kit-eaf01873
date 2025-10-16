@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\AuthController;
 use App\Controllers\BeritaController;
 use App\Controllers\HomeController;
 use App\Controllers\LayananController;
@@ -13,6 +14,10 @@ use App\Controllers\TransparencyYearController;
 use App\Controllers\StatisticsSnapshotController;
 
 $router->get('/', [HomeController::class, 'index']);
+
+$router->get('auth/login', [AuthController::class, 'login']);
+$router->post('auth/process', [AuthController::class, 'process']);
+$router->get('auth/logout', [AuthController::class, 'logout']);
 
 $router->resource('pengguna', PenggunaController::class);
 $router->resource('kategori-berita', KategoriBeritaController::class);

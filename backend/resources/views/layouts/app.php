@@ -29,7 +29,7 @@
 
             <div id="content">
 
-                <?php require __DIR__ . '/../partials/topbar.php'; ?>
+                <?php if (is_file(__DIR__ . '/../partials/topbar.php')) {require __DIR__ . '/../partials/topbar.php';} ?>
 
                 <div class="container-fluid">
 
